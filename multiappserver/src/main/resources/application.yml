@@ -1,0 +1,7 @@
+
+
+app:
+    downloaddir: .\\workspace\\download
+    installdir: .\\workspace\\app
+    localdir: .\\workspace\\local
+
