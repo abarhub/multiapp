@@ -1,21 +1,18 @@
 package org.multiapp.server.cli;
 
-import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
+import org.multiapp.server.domain.Application;
 import org.multiapp.server.domain.ApplicationName;
 import org.multiapp.server.domain.Processus;
 import org.multiapp.server.service.CommandService;
-import org.multiapp.server.service.RunService;
+import org.multiapp.server.service.QueryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -26,19 +23,13 @@ public class Menu {
 
 	public static Logger LOGGER = LoggerFactory.getLogger(Menu.class);
 
-	@Value("${app.downloaddir}")
-	private String downloadDirectory;
-
-	@Value("${app.installdir}")
-	private String installDirectory;
-
 	private Scanner scanner;
 
 	@Autowired
 	private CommandService command;
 
 	@Autowired
-	private RunService runService;
+	private QueryService queryService;
 
 	public void menu() {
 
@@ -68,7 +59,7 @@ public class Menu {
 	}
 
 	private void menuKill() {
-		List<Processus> processusList = runService.getProcessList();
+		List<Processus> processusList = queryService.getProcessList();
 
 		if (processusList.isEmpty()) {
 			System.out.println("Il n'y a aucun processus en cours");
@@ -92,39 +83,33 @@ public class Menu {
 
 	private void menuRun() {
 		int menu;
-		Path p = Paths.get(installDirectory);
 		try {
-			List<String> listeRepertoires = Files.list(p)
-					//.filter(x -> x.endsWith(".jar"))
-					.map(x -> x.toString())
-					.collect(Collectors.toList());
+			List<Application> liste = queryService.getApplication();
 
-			menu = menu(Lists.newArrayList(listeRepertoires));
+			menu = menu(convertApplication(liste));
 			LOGGER.info("choix={}", menu);
 			if (menu > 0) {
-				String s = listeRepertoires.get(menu - 1);
-				Path p2 = Paths.get(s);
-				command.run(appName(p2));
+				Application p2 = liste.get(menu - 1);
+				command.run(p2.getApplicationName());
 			}
 		} catch (IOException e) {
 			LOGGER.error("Erreur : {}", e.getMessage(), e);
 		}
 	}
 
+	private List<Object> convertApplication(List<Application> liste) {
+		return liste.stream().map(Application::getApplicationName).collect(Collectors.toList());
+	}
+
 	private void menuInstall() {
 		int menu;
-		Path p = Paths.get(downloadDirectory);
 		try {
-			List<String> listeRepertoires = Files.list(p)
-					//.filter(x -> x.endsWith(".jar"))
-					.map(x -> x.toString())
-					.collect(Collectors.toList());
+			List<Path> liste = queryService.getInstallable();
 
-			menu = menu(Lists.newArrayList(listeRepertoires));
+			menu = menu(Lists.newArrayList(liste));
 			LOGGER.info("choix={}", menu);
 			if (menu > 0) {
-				String s = listeRepertoires.get(menu - 1);
-				Path p2 = Paths.get(s);
+				Path p2 = liste.get(menu - 1);
 				command.install(p2.toAbsolutePath());
 			}
 		} catch (IOException e) {
@@ -134,19 +119,13 @@ public class Menu {
 
 	private void menuUninstall() {
 		int menu;
-		Path p = Paths.get(installDirectory);
 		try {
-			List<String> listeRepertoires = Files.list(p)
-					//.filter(x -> x.endsWith(".jar"))
-					.map(x -> x.toString())
-					.collect(Collectors.toList());
+			List<Application> liste = queryService.getApplication();
 
-			menu = menu(Lists.newArrayList(listeRepertoires));
+			menu = menu(convertApplication(liste));
 			LOGGER.info("choix={}", menu);
 			if (menu > 0) {
-				String s = listeRepertoires.get(menu - 1);
-				Path p2 = Paths.get(s);
-				ApplicationName appName = appName(p2);
+				ApplicationName appName = liste.get(menu - 1).getApplicationName();
 				command.uninstall(appName);
 			}
 		} catch (IOException e) {
@@ -155,7 +134,7 @@ public class Menu {
 	}
 
 
-	private int menu(List<String> listeOptions) {
+	private int menu(List<Object> listeOptions) {
 		boolean fin = false;
 		int menuChoisi = 0;
 		Scanner scanner = getScanner();
@@ -202,11 +181,4 @@ public class Menu {
 		return scanner;
 	}
 
-	private ApplicationName appName(Path path) {
-		Verify.verifyNotNull(path);
-		String appName = path.getFileName().toString();
-		Verify.verifyNotNull(appName);
-		Verify.verify(!appName.trim().isEmpty(), "path '" + appName + "' invalide");
-		return new ApplicationName(appName);
-	}
 }

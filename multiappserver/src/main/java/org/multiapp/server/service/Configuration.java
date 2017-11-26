@@ -20,6 +20,12 @@ public class Configuration {
 	@Value("${app.localdir}")
 	private String localDirectory;
 
+	@Value("${app.downloaddir}")
+	private String downloadDirectory;
+
+	public Path getDownloadDirectory() {
+		return Paths.get(downloadDirectory).toAbsolutePath();
+	}
 
 	public Path getInstallDirectory() {
 		return Paths.get(installDirectory).toAbsolutePath();

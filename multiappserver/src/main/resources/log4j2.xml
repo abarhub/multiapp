@@ -25,7 +25,10 @@
         </RollingFile>
     </Appenders>
     <Loggers>
+
         <Logger name="org.multiapp.server" level="debug"/>
+
+        <Logger name="org.thymeleaf" level="error"/>
 
         <Root level="info">
             <AppenderRef ref="ConsoleAppender"/>

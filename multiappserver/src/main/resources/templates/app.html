@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>App</title>
+    <!--<link rel="stylesheet" href="static/css/bootstrap.min.css"/>-->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" href="../../../css/bootstrap.min.css"/>
+    <!--<script src="static/js/jquery-3.2.1.min.js"></script>
+    <script src="static/popper.1.12.9.js"></script>
+    <script src="static/js/bootstrap.min.js"></script>-->
+    <script th:src="@{/js/jquery-3.2.1.min.js}"></script>
+    <script th:src="@{/js/popper.1.12.9.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="row">
+        <div class="col">
+            <h4>Applications à installer :</h4>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <table class="table-hover table-bordered table-striped col">
+            <!--/*@thymesVar id="installable" type="org.multiapp.server.web.dto.PackageDto"*/-->
+            <tr th:each="toinstall : ${installable}">
+                <td th:text="${toinstall.filename}"/>
+                <td th:text="${toinstall.path}"/>
+            </tr>
+        </table>
+
+    </div>
+
+    <hr/>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <h4>Applications installées :</h4>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <table class="table-hover table-bordered table-striped col">
+            <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Chemin</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!--/*@thymesVar id="installe" type="org.multiapp.server.web.dto.ApplicationDto"*/-->
+            <tr th:each="install : ${installe}">
+                <td th:text="${install.name}">name</td>
+                <td th:text="${install.path}">path</td>
+            </tr>
+            </tbody>
+        </table>
+
+
+    </div>
+
+    <hr/>
+    <div class="row">
+
+        <div class="col">
+
+            Console :
+
+        </div>
+
+    </div>
+
+
+</div>
+
+</body>
+</html>

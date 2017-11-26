@@ -1,6 +1,7 @@
 package org.multiapp.server.domain;
 
 import com.google.common.base.Verify;
+import org.multiapp.server.util.AppUtil;
 
 public class ApplicationName {
 
@@ -9,6 +10,7 @@ public class ApplicationName {
 	public ApplicationName(String name) {
 		Verify.verifyNotNull(name);
 		Verify.verify(!name.trim().isEmpty(), "name is empty");
+		Verify.verify(AppUtil.isNameValide(name), "name is invalide");
 		this.name = name;
 	}
 
