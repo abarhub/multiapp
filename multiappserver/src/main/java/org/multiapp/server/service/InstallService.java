@@ -3,6 +3,7 @@ package org.multiapp.server.service;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Verify;
 import com.google.common.collect.Maps;
+import org.multiapp.server.util.DirectoryType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +16,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -180,16 +178,22 @@ public class InstallService {
 			deleteAll(path);
 			LOGGER.info("Suppression de l'application {} OK", nomApp);
 
-			Path configDirectory = configuration.getLocalConfigDirectory().resolve(nomApp);
-			if (Files.exists(configDirectory)) {
+			Optional<Path> configDirectoryOpt = configuration.getLocalDirectory(DirectoryType.CONFIGURATION, nomApp);
+			if (configDirectoryOpt.isPresent()) {
 				LOGGER.info("Suppression de la configuration de l'application {} ...", nomApp);
-				deleteAll(configDirectory);
+				deleteAll(configDirectoryOpt.get());
 				LOGGER.info("Suppression de la configuration de l'application {} OK", nomApp);
 			}
 
+			Optional<Path> logDirectoryOpt = configuration.getLocalDirectory(DirectoryType.LOGGING, nomApp);
+			if (logDirectoryOpt.isPresent()) {
+				LOGGER.info("Suppression des logs de l'application {} ...", nomApp);
+				deleteAll(logDirectoryOpt.get());
+				LOGGER.info("Suppression des logs de l'application {} OK", nomApp);
+			}
 
 		} catch (IOException e) {
-			LOGGER.error("Erreur pour supprimer l'application {} : ", nomApp, e.getMessage());
+			LOGGER.error("Erreur pour supprimer l'application {} :", nomApp, e);
 		}
 	}
 
@@ -200,7 +204,6 @@ public class InstallService {
 				for (Path p : liste) {
 					deleteAll(p);
 				}
-				deleteAll(path);
 			}
 			Files.delete(path);
 		} else {

@@ -132,7 +132,7 @@ public class Menu {
 
 	private void menuUninstall() {
 		int menu;
-		Path p = Paths.get(downloadDirectory);
+		Path p = Paths.get(installDirectory);
 		try {
 			List<String> listeRepertoires = Files.list(p)
 					//.filter(x -> x.endsWith(".jar"))
