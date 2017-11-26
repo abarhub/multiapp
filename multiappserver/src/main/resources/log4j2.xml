@@ -4,19 +4,32 @@
         <Property name="LOG_PATTERN">
             %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
         </Property>
+        <Property name="LOG_PATH">
+            ./workspace/global/log
+        </Property>
     </Properties>
     <Appenders>
         <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
             <PatternLayout pattern="${LOG_PATTERN}"/>
         </Console>
+        <RollingFile name="RollingFileAppender">
+            <FileName>${LOG_PATH}/multiappserver.log</FileName>
+            <FilePattern>${LOG_PATH}/multiappserver-%d{yyyy-MM-dd}.log.zip</FilePattern>
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+            <DefaultRolloverStrategy max="5"/>
+        </RollingFile>
     </Appenders>
     <Loggers>
-        <Logger name="com.example.log4j2demo" level="debug" additivity="false">
-            <AppenderRef ref="ConsoleAppender" />
-        </Logger>
+        <Logger name="org.multiapp.server" level="debug"/>
 
         <Root level="info">
-            <AppenderRef ref="ConsoleAppender" />
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="RollingFileAppender"/>
         </Root>
     </Loggers>
 </Configuration>

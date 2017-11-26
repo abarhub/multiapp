@@ -1,6 +1,7 @@
 package org.multiapp.server.service;
 
 import com.google.common.base.Verify;
+import org.multiapp.server.domain.ApplicationName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class CommandService {
 		installService.install(path);
 	}
 
-	public void run(String nomApp) {
+	public void run(ApplicationName nomApp) {
 		Verify.verifyNotNull(nomApp);
 
 		LOGGER.info("run {}", nomApp);
@@ -36,7 +37,7 @@ public class CommandService {
 	}
 
 	public void kill(int idProc) {
-		Verify.verify(idProc>0);
+		Verify.verify(idProc > 0);
 
 		LOGGER.info("kill {}", idProc);
 
@@ -44,11 +45,11 @@ public class CommandService {
 
 	}
 
-	public void uninstall(Path path) {
-		Verify.verifyNotNull(path);
+	public void uninstall(ApplicationName applicationName) {
+		Verify.verifyNotNull(applicationName);
 
-		LOGGER.info("uninstall {}", path);
+		LOGGER.info("uninstall {}", applicationName);
 
-		installService.uninstall(path);
+		installService.uninstall(applicationName);
 	}
 }

@@ -1,7 +1,9 @@
-package org.multiapp.server;
+package org.multiapp.server.cli;
 
+import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
-import org.multiapp.server.bean.Processus;
+import org.multiapp.server.domain.ApplicationName;
+import org.multiapp.server.domain.Processus;
 import org.multiapp.server.service.CommandService;
 import org.multiapp.server.service.RunService;
 import org.slf4j.Logger;
@@ -102,7 +104,7 @@ public class Menu {
 			if (menu > 0) {
 				String s = listeRepertoires.get(menu - 1);
 				Path p2 = Paths.get(s);
-				command.run(p2.getFileName().toString());
+				command.run(appName(p2));
 			}
 		} catch (IOException e) {
 			LOGGER.error("Erreur : {}", e.getMessage(), e);
@@ -144,7 +146,8 @@ public class Menu {
 			if (menu > 0) {
 				String s = listeRepertoires.get(menu - 1);
 				Path p2 = Paths.get(s);
-				command.uninstall(p2.toAbsolutePath());
+				ApplicationName appName = appName(p2);
+				command.uninstall(appName);
 			}
 		} catch (IOException e) {
 			LOGGER.error("Erreur : {}", e.getMessage(), e);
@@ -197,5 +200,13 @@ public class Menu {
 			scanner = new Scanner(System.in);
 		}
 		return scanner;
+	}
+
+	private ApplicationName appName(Path path) {
+		Verify.verifyNotNull(path);
+		String appName = path.getFileName().toString();
+		Verify.verifyNotNull(appName);
+		Verify.verify(!appName.trim().isEmpty(), "path '" + appName + "' invalide");
+		return new ApplicationName(appName);
 	}
 }

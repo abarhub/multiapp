@@ -1,7 +1,8 @@
 package org.multiapp.server.service;
 
 import com.google.common.base.Verify;
-import org.multiapp.server.util.DirectoryType;
+import org.multiapp.server.domain.ApplicationName;
+import org.multiapp.server.domain.DirectoryType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -40,17 +41,23 @@ public class Configuration {
 		return getLocalDirectory().resolve("temp");
 	}
 
-	public Optional<Path> getLocalDirectory(DirectoryType directoryType, String nameApp) {
+	public Path getLocalAppDirectory() {
+		return Paths.get(installDirectory).toAbsolutePath();
+	}
+
+	public Optional<Path> getLocalDirectory(DirectoryType directoryType, ApplicationName nameApp) {
 		Path local = null;
 		Verify.verifyNotNull(directoryType);
 		Verify.verifyNotNull(nameApp);
-		Verify.verify(!nameApp.trim().isEmpty(), "nameApp is empty");
 		switch (directoryType) {
 			case CONFIGURATION:
-				local = getLocalConfigDirectory().resolve(nameApp);
+				local = getLocalConfigDirectory().resolve(nameApp.getName());
 				break;
 			case LOGGING:
-				local = getLocalLogDirectory().resolve(nameApp);
+				local = getLocalLogDirectory().resolve(nameApp.getName());
+				break;
+			case INSTALL:
+				local = getLocalAppDirectory().resolve(nameApp.getName());
 				break;
 			default:
 				Verify.verify(false, "directoryType invalide : " + directoryType);

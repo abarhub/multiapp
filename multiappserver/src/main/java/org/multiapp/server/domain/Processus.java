@@ -1,12 +1,12 @@
-package org.multiapp.server.bean;
+package org.multiapp.server.domain;
 
 public class Processus {
 
 	private final Process process;
 	private final int id;
-	private final String nomApp;
+	private final ApplicationName nomApp;
 
-	public Processus(Process process, int id, String nomApp) {
+	public Processus(Process process, int id, ApplicationName nomApp) {
 		this.process = process;
 		this.id = id;
 		this.nomApp = nomApp;
@@ -20,7 +20,7 @@ public class Processus {
 		return id;
 	}
 
-	public String getNomApp() {
+	public ApplicationName getNomApp() {
 		return nomApp;
 	}
 

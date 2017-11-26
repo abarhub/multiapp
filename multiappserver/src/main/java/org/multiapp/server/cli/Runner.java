@@ -1,4 +1,4 @@
-package org.multiapp.server;
+package org.multiapp.server.cli;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

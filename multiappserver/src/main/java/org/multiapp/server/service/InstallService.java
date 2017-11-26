@@ -3,7 +3,8 @@ package org.multiapp.server.service;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Verify;
 import com.google.common.collect.Maps;
-import org.multiapp.server.util.DirectoryType;
+import org.multiapp.server.domain.ApplicationName;
+import org.multiapp.server.domain.DirectoryType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,29 +168,35 @@ public class InstallService {
 		}
 	}
 
-	public void uninstall(Path path) {
-		Verify.verifyNotNull(path);
-		LOGGER.info("uninstall {} ...", path);
-
-		String nomApp = path.getFileName().toString();
+	public void uninstall(ApplicationName nomApp) {
+		Verify.verifyNotNull(nomApp);
+		LOGGER.info("uninstall {} ...", nomApp);
 
 		try {
-			LOGGER.info("Suppression de l'application {} ...", nomApp);
-			deleteAll(path);
-			LOGGER.info("Suppression de l'application {} OK", nomApp);
+			Optional<Path> pathOpt = configuration.getLocalDirectory(DirectoryType.INSTALL, nomApp);
 
-			Optional<Path> configDirectoryOpt = configuration.getLocalDirectory(DirectoryType.CONFIGURATION, nomApp);
-			if (configDirectoryOpt.isPresent()) {
-				LOGGER.info("Suppression de la configuration de l'application {} ...", nomApp);
-				deleteAll(configDirectoryOpt.get());
-				LOGGER.info("Suppression de la configuration de l'application {} OK", nomApp);
-			}
+			if (pathOpt.isPresent()) {
+				Path path = pathOpt.get();
 
-			Optional<Path> logDirectoryOpt = configuration.getLocalDirectory(DirectoryType.LOGGING, nomApp);
-			if (logDirectoryOpt.isPresent()) {
-				LOGGER.info("Suppression des logs de l'application {} ...", nomApp);
-				deleteAll(logDirectoryOpt.get());
-				LOGGER.info("Suppression des logs de l'application {} OK", nomApp);
+				LOGGER.info("Suppression de l'application {} ...", nomApp);
+				deleteAll(path);
+				LOGGER.info("Suppression de l'application {} OK", nomApp);
+
+				Optional<Path> configDirectoryOpt = configuration.getLocalDirectory(DirectoryType.CONFIGURATION, nomApp);
+				if (configDirectoryOpt.isPresent()) {
+					LOGGER.info("Suppression de la configuration de l'application {} ...", nomApp);
+					deleteAll(configDirectoryOpt.get());
+					LOGGER.info("Suppression de la configuration de l'application {} OK", nomApp);
+				}
+
+				Optional<Path> logDirectoryOpt = configuration.getLocalDirectory(DirectoryType.LOGGING, nomApp);
+				if (logDirectoryOpt.isPresent()) {
+					LOGGER.info("Suppression des logs de l'application {} ...", nomApp);
+					deleteAll(logDirectoryOpt.get());
+					LOGGER.info("Suppression des logs de l'application {} OK", nomApp);
+				}
+			} else {
+				LOGGER.error("Impossible de trouver l'application {}", nomApp);
 			}
 
 		} catch (IOException e) {
