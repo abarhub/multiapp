@@ -2,8 +2,17 @@ package org.multiapp.server.web.dto;
 
 public class ApplicationDto {
 
+	private int id;
 	private String name;
 	private String path;
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
 
 	public String getName() {
 		return name;
@@ -24,7 +33,8 @@ public class ApplicationDto {
 	@Override
 	public String toString() {
 		return "ApplicationDto{" +
-				"name='" + name + '\'' +
+				"id=" + id +
+				", name='" + name + '\'' +
 				", path='" + path + '\'' +
 				'}';
 	}

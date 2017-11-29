@@ -2,8 +2,17 @@ package org.multiapp.server.web.dto;
 
 public class PackageDto {
 
+	private int id;
 	private String filename;
 	private String path;
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
 
 	public String getFilename() {
 		return filename;
@@ -24,8 +33,9 @@ public class PackageDto {
 	@Override
 	public String toString() {
 		return "PackageDto{" +
-				"filename='" + filename + '\'' +
-				", path=" + path +
+				"id=" + id +
+				", filename='" + filename + '\'' +
+				", path='" + path + '\'' +
 				'}';
 	}
 }
