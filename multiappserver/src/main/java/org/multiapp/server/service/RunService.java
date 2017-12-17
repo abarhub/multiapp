@@ -2,6 +2,7 @@ package org.multiapp.server.service;
 
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import org.multiapp.server.domain.ApplicationName;
 import org.multiapp.server.domain.DirectoryType;
 import org.multiapp.server.domain.Processus;
@@ -14,6 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -72,15 +75,34 @@ public class RunService {
 	private void runProcess(ApplicationName nomApp, Path workingDir, Path exec) throws IOException {
 		List<String> liste = new ArrayList<>();
 		liste.add("java");
-		liste.add("-jar");
-		liste.add(exec.toString());
+		//liste.add("-Dlog4j.debug");
+		liste.add("-Dorg.apache.logging.log4j.simplelog.StatusLogger.level=TRACE");
+		//liste.add("-Ddebug");
+//		liste.add("-jar");
+//		liste.add(exec.toString());
 
 		Path localDir = configuration.getLocalDirectory();
 		Optional<Path> pathOpt = configuration.getLocalDirectory(DirectoryType.CONFIGURATION, nomApp);
 		if (pathOpt.isPresent()) {
+
+			Path logConf = pathOpt.get().resolve("log4j2.xml");
+			if (Files.exists(logConf)) {
+				//liste.add("-Dlog4j.configurationFile=file://" + logConf.normalize().toAbsolutePath());
+				//liste.add("-Dlog4j.configurationFile=file://C:\\projet\\tvfs\\multiapp\\multiappserver\\workspace\\local\\config\\simpleapp\\log4j2.xml");
+				liste.add("-Dlog4j.configurationFile=file://C:/projet/tvfs/multiapp/multiappserver/workspace/local/config/simpleapp/log4j2.xml");
+			}
+
+			Path dirConf = pathOpt.get().resolve("tvfsconfig.properties");
+			if (Files.exists(dirConf)) {
+				liste.add("-DTVFS_CONFIG_FILE=file:/" + dirConf.normalize().toAbsolutePath());
+			}
+
+			liste.add("-jar");
+			liste.add(exec.toString());
+
 			Path appliConf = pathOpt.get().resolve("application.properties");
 			if (Files.exists(appliConf)) {
-				liste.add("--spring.config.location=file:/" + appliConf.toString());
+				liste.add("--spring.config.location=file:/" + appliConf.normalize().toString());
 			}
 
 			LOGGER.info("run {} : {}", nomApp, liste);
@@ -108,8 +130,11 @@ public class RunService {
 			if (logDirOpt.isPresent()) {
 				Path logDir = logDirOpt.get();
 				File logErr = logDir.resolve("stderr.log").toFile();
+				LocalDateTime date = LocalDateTime.now();
+				appendStart(logErr, date);
 				pb.redirectError(ProcessBuilder.Redirect.appendTo(logErr));
 				File logOut = logDir.resolve("stdout.log").toFile();
+				appendStart(logOut, date);
 				pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logOut));
 				Process p3 = null;
 				Processus processus = null;
@@ -145,6 +170,10 @@ public class RunService {
 		} else {
 			LOGGER.error("Impossible de trouver le répertoire de configuration");
 		}
+	}
+
+	private void appendStart(File logErr, LocalDateTime date) throws IOException {
+		Files.write(logErr.toPath(), Lists.newArrayList("Start at " + date), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 	}
 
 	private int getCompteur() {

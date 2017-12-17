@@ -10,13 +10,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -89,9 +89,46 @@ public class InstallService {
 			Files.write(fichierConfApp2, buf);
 			LOGGER.info("enregistrement du fichier de configuration {} OK", fichierConfApp2);
 
+			Path fichierConfPath = configDir.resolve("tvfsconfig.properties");
+			LOGGER.info("enregistrement du fichier de configuration des répertoires {} ...", fichierConfPath);
+			List<String> confPath = getConfPath(configDir, logDir);
+			buf = getFileFromZip(fileUri, "/BOOT-INF/classes/install/tvfsconfig.properties");
+			if (buf != null && buf.length > 0) {
+				try (BufferedReader reader = new BufferedReader(
+						new InputStreamReader(
+								new ByteArrayInputStream(buf), StandardCharsets.UTF_8))) {
+					List<String> lines = reader.lines().collect(Collectors.toList());
+					confPath.addAll(lines);
+				}
+			}
+			Files.write(fichierConfPath, confPath, StandardOpenOption.CREATE_NEW);
+			LOGGER.info("enregistrement du fichier de configuration des répertoires {} OK", fichierConfPath);
+
+
+			Path fichierConfLog = configDir.resolve("log4j2.xml");
+			buf = getFileFromZip(fileUri, "/BOOT-INF/classes/install/log4j2.xml");
+			if (buf != null && buf.length > 0) {
+				LOGGER.info("enregistrement du fichier de configuration {} ...", fichierConfLog);
+				Files.write(fichierConfLog, buf);
+				LOGGER.info("enregistrement du fichier de configuration {} OK", fichierConfLog);
+			}
+
 		} catch (IOException e) {
 			LOGGER.error("Erreur : {}", e.getMessage(), e);
 		}
+	}
+
+	private List<String> getConfPath(Path configDir, Path logDir) {
+		List<String> res = new ArrayList<>();
+		res.add("# log dir");
+		res.add("tvfs.dir1.name=log");
+		res.add("tvfs.dir1.directory=" + logDir.toAbsolutePath());
+		res.add("tvfs.dir1.readonly=false");
+		res.add("# conf dir");
+		res.add("tvfs.dir2.name=conf");
+		res.add("tvfs.dir2.directory=" + configDir.toAbsolutePath());
+		res.add("tvfs.dir2.readonly=true");
+		return res;
 	}
 
 	private String trouveNom(String nom) {
@@ -145,7 +182,7 @@ public class InstallService {
 						try {
 							Files.walk(root).forEach(path -> {
 								if (res.isEmpty()) {
-									LOGGER.info("path: {}", path);
+									LOGGER.trace("path: {}", path);
 									try {
 										if (path.toString().equals(fichier)) {
 											res.add(Files.readAllBytes(path));

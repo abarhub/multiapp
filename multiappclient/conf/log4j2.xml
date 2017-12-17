@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
+        </Property>
+        <Property name="LOG_PATH">
+            ./multiappclient/temp/log
+        </Property>
+    </Properties>
+    <Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+        <RollingFile name="RollingFileAppender">
+            <FileName>${LOG_PATH}/multiappclient.log</FileName>
+            <FilePattern>${LOG_PATH}/multiappclient-%d{yyyy-MM-dd}.log.zip</FilePattern>
+            <PatternLayout>
+                <Pattern>${LOG_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+            <DefaultRolloverStrategy max="5"/>
+        </RollingFile>
+        <!--<MyCustomAppender name="ABC">-->
+        <!--</MyCustomAppender>-->
+        <MyCustomAppender3 name="myapp">
+            <FileName>test2.log</FileName>
+            <PatternLayout
+                    pattern="serial no: %sn |  Date: %d |  level:%level | class name:%logger | method name:%M() |  line number:%L |  Location: %l | message:%m%n"/>
+        </MyCustomAppender3>
+    </Appenders>
+    <Loggers>
+
+        <Logger name="org.multiapp.server" level="debug"/>
+
+        <Logger name="org.thymeleaf" level="error"/>
+
+        <Root level="info">
+            <AppenderRef ref="ConsoleAppender"/>
+            <AppenderRef ref="RollingFileAppender"/>
+            <AppenderRef ref="myapp"/>
+        </Root>
+    </Loggers>
+</Configuration>

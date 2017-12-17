@@ -5,7 +5,7 @@
   <groupId>org.multiapp</groupId>
   <artifactId>org.multiapp.parent</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
 
   <name>org.multiapp.parent</name>
   <url>http://maven.apache.org</url>
@@ -16,6 +16,7 @@
 
   <modules>
     <module>multiappserver</module>
+    <module>multiappclient</module>
     <module>appsimple</module>
   </modules>
 
