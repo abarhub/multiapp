@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -97,6 +98,12 @@ public class RunService {
 				liste.add("-DTVFS_CONFIG_FILE=file:/" + dirConf.normalize().toAbsolutePath());
 			}
 
+//			Path dirPolicy = pathOpt.get().resolve("policy.properties");
+//			if (Files.exists(dirPolicy)) {
+//				liste.add("-Djava.security.manager");
+//				liste.add("-Djava.security.policy==file:/" + dirPolicy.normalize().toAbsolutePath());
+//			}
+
 			liste.add("-jar");
 			liste.add(exec.toString());
 
@@ -128,12 +135,15 @@ public class RunService {
 			pb.directory(workingDir.toFile());
 			Optional<Path> logDirOpt = configuration.getLocalDirectory(DirectoryType.LOGGING, nomApp);
 			if (logDirOpt.isPresent()) {
-				Path logDir = logDirOpt.get();
-				File logErr = logDir.resolve("stderr.log").toFile();
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 				LocalDateTime date = LocalDateTime.now();
+				String dateStr = date.format(formatter);
+				Path logDir = logDirOpt.get();
+				File logErr = logDir.resolve("stderr" + dateStr + ".log").toFile();
+
 				appendStart(logErr, date);
 				pb.redirectError(ProcessBuilder.Redirect.appendTo(logErr));
-				File logOut = logDir.resolve("stdout.log").toFile();
+				File logOut = logDir.resolve("stdout" + dateStr + ".log").toFile();
 				appendStart(logOut, date);
 				pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logOut));
 				Process p3 = null;
